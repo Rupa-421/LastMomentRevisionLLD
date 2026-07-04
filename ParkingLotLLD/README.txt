@@ -148,6 +148,8 @@ Interview Answer
 
 I would introduce EntryGate and ExitGate classes. Each gate would delegate requests to the shared ParkingService. Since allocation and checkout are already synchronized using locks, multiple gates can safely operate concurrently.
 
+With multiple entry gates, I would pass the EntryGate as context to the allocation strategy. Instead of searching all floors uniformly, the strategy maintains a preferred list of floors for each gate (for example, Gate 1 → Floors 1, 2, 3 and Gate 2 → Floors 4, 3, 2). This allows us to allocate the nearest available spot while keeping the allocation logic pluggable. ExitGate remains lightweight because the ticket already contains the allocated spot and floor information needed for checkout. This design scales well as we add more gates or floors without changing the core parking workflow.
+
 Classes Added
 EntryGate
 
