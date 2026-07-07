@@ -9,6 +9,24 @@ NetBankingPayment
 class OrderService{
     private PaymentService paymentService;
     private InventoryService inventoryService;
+    public Order buildOrder(Cart cart){
+            Order order = new Order();
+            for(CartItem cartItem : cart.getItems()){
+                MenuItem latest =
+                        menuRepository.get(cartItem.getItemId());
+                if(latest.getPrice()
+                        != cartItem.getPriceSnapshot()){
+                    throw new PriceChangedException();
+                }
+                OrderItem orderItem =
+                        new OrderItem(
+                                cartItem.getItemId(),
+                                cartItem.getQuantity(),
+                                cartItem.getPriceSnapshot());
+                order.add(orderItem);
+                }
+        return order;
+    }
     public Order createOrder(Cart cart,PaymentStrategy paymentStrategy){
         validateCart(cart);
         Order order = buildOrder(cart);
@@ -66,7 +84,13 @@ class CartService{
         if(!item.isActive()){
             throw new InactiveMenuItemException();
         }
-        cart.addItem(item,quantity);
+        CartItem cartItem = new CartItem(
+                item.getItemId(),
+                quantity,
+                item.getPrice()      // snapshot
+        );
+
+        cart.addItem(cartItem,quantity);
     }
     public void removeItem(Cart cart ,MenuItem item){
         cart.removeItem(item);
